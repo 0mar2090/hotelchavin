@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #C8A45C;
+  --gold-light: #E8D5A3;
+  --navy: #1B2A4A;
+  --navy-dark: #0F1A30;
+  --cream: #FDF8F0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  color: #1a1a2e;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(200, 164, 92, 0.3);
+  color: #1B2A4A;
+}
+
+@layer components {
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 py-16 md:py-24;
+  }
+
+  .container-max {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .heading-primary {
+    @apply font-display text-3xl md:text-4xl lg:text-5xl font-bold text-brand-navy leading-tight;
+  }
+
+  .heading-secondary {
+    @apply font-display text-2xl md:text-3xl font-bold text-brand-navy;
+  }
+
+  .text-body {
+    @apply text-gray-600 text-base md:text-lg leading-relaxed;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-gold hover:bg-brand-gold-dark 
+           text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 
+           hover:shadow-lg hover:shadow-brand-gold/25 active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border-2 border-brand-navy text-brand-navy 
+           font-semibold px-6 py-3 rounded-lg transition-all duration-300 
+           hover:bg-brand-navy hover:text-white;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl 
+           transition-all duration-300 hover:-translate-y-1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
