@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ATTRACTIONS } from "@/lib/constants";
 import { MapPin, Compass } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -39,8 +40,8 @@ export default function Discover() {
                     </h2>
                     <div className="gold-line-center mb-6" />
                     <p className="text-gray-400 text-base md:text-lg leading-relaxed">
-                        Ubicados estratégicamente cerca de los principales atractivos
-                        turísticos del norte chico de Lima.
+                        Ubicados estrategicamente cerca de los principales atractivos
+                        turisticos del norte chico de Lima.
                     </p>
                 </div>
 
@@ -54,13 +55,16 @@ export default function Discover() {
                             key={attr.id}
                             className="group relative rounded-2xl overflow-hidden glass hover:border-brand-gold/30 transition-all duration-500"
                         >
-                            {/* Image */}
+                            {/* Image - next/image with proper sizes for responsive loading */}
                             <div className="relative h-52 overflow-hidden">
-                                <img
+                                <Image
                                     src={attr.image}
                                     alt={attr.name}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 33vw"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     loading="lazy"
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    quality={75}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/30 to-transparent" />
 

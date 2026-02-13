@@ -111,6 +111,12 @@ export default function RootLayout({
         <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
             <head>
                 <link rel="icon" href="/favicon.ico" sizes="any" />
+                {/* Preconnect to image CDN - saves ~100-300ms on first image load */}
+                <link rel="preconnect" href="https://images.unsplash.com" />
+                <link rel="dns-prefetch" href="https://images.unsplash.com" />
+                {/* Preconnect to Google Maps for footer embed */}
+                <link rel="dns-prefetch" href="https://www.google.com" />
+                <link rel="dns-prefetch" href="https://maps.googleapis.com" />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

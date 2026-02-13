@@ -1,18 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { HOTEL, NAV_LINKS } from "@/lib/constants";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const rafId = useRef<number>(0);
+
+    const handleScroll = useCallback(() => {
+        if (rafId.current) cancelAnimationFrame(rafId.current);
+
+        rafId.current = requestAnimationFrame(() => {
+            setScrolled(window.scrollY > 20);
+        });
+    }, []);
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 20);
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            if (rafId.current) cancelAnimationFrame(rafId.current);
+        };
+    }, [handleScroll]);
 
     const handleNavClick = (href: string) => {
         setIsOpen(false);
@@ -27,7 +38,7 @@ export default function Header() {
                     : "bg-brand-navy/90 backdrop-blur-sm"
                 }`}
         >
-            {/* Top bar – contact */}
+            {/* Top bar - contact */}
             <div
                 className={`hidden md:flex items-center justify-between px-8 py-2 text-sm transition-colors duration-300 ${scrolled
                         ? "bg-brand-navy text-white"
@@ -77,13 +88,13 @@ export default function Header() {
                             className={`font-display font-bold text-lg leading-tight transition-colors ${scrolled ? "text-brand-navy" : "text-white"
                                 }`}
                         >
-                            Hotel Chavín
+                            Hotel Chavin
                         </span>
                         <span
                             className={`text-[10px] uppercase tracking-[0.2em] transition-colors ${scrolled ? "text-brand-gold" : "text-brand-gold-light"
                                 }`}
                         >
-                            Barranca – Perú
+                            Barranca - Peru
                         </span>
                     </div>
                 </a>
@@ -108,7 +119,7 @@ export default function Header() {
                     ))}
                     <a
                         href={`https://wa.me/${HOTEL.whatsapp}?text=${encodeURIComponent(
-                            "Hola Hotel Chavín, deseo hacer una reservación."
+                            "Hola Hotel Chavin, deseo hacer una reservacion."
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -123,7 +134,7 @@ export default function Header() {
                     onClick={() => setIsOpen(!isOpen)}
                     className={`lg:hidden p-2 rounded-lg transition-colors ${scrolled ? "text-brand-navy hover:bg-gray-100" : "text-white hover:bg-white/10"
                         }`}
-                    aria-label="Menú"
+                    aria-label="Menu"
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -151,7 +162,7 @@ export default function Header() {
                     <div className="pt-2">
                         <a
                             href={`https://wa.me/${HOTEL.whatsapp}?text=${encodeURIComponent(
-                                "Hola Hotel Chavín, deseo hacer una reservación."
+                                "Hola Hotel Chavin, deseo hacer una reservacion."
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"

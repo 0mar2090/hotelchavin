@@ -1,86 +1,92 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Send, MapPin, Star, ChevronDown, Shield, Clock, Wifi } from "lucide-react";
-import { HOTEL, getWhatsAppLink } from "@/lib/constants";
-import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { MapPin, Star, ChevronDown, Shield, Clock, Wifi } from "lucide-react";
+import { HOTEL } from "@/lib/constants";
+import { useEffect, useRef, useCallback } from "react";
 
-const reservationSchema = z.object({
-    name: z.string().min(2, "Ingresa tu nombre completo"),
-    phone: z.string().min(6, "Ingresa un teléfono válido"),
-    email: z.string().email("Ingresa un email válido"),
-    message: z.string().optional(),
+// Code-split the form: react-hook-form + zod + @hookform/resolvers (~90KB)
+// are now loaded asynchronously, not blocking LCP
+const HeroForm = dynamic(() => import("@/components/HeroForm"), {
+    loading: () => (
+        <div className="space-y-4 animate-pulse">
+            <div className="h-12 bg-white/5 rounded-xl" />
+            <div className="grid grid-cols-2 gap-4">
+                <div className="h-12 bg-white/5 rounded-xl" />
+                <div className="h-12 bg-white/5 rounded-xl" />
+            </div>
+            <div className="h-20 bg-white/5 rounded-xl" />
+            <div className="h-14 bg-white/10 rounded-xl" />
+        </div>
+    ),
+    ssr: false,
 });
 
-type ReservationData = z.infer<typeof reservationSchema>;
+// Static badge data moved outside component to avoid recreation on each render
+const featureBadges = [
+    { icon: Shield, label: "Seguro" },
+    { icon: Clock, label: "24/7" },
+    { icon: Wifi, label: "Wi-Fi" },
+] as const;
 
 export default function Hero() {
-    const [submitted, setSubmitted] = useState(false);
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    // Use refs + CSS custom properties for parallax instead of state
+    // This avoids re-rendering the entire component tree on every mousemove
+    const parallaxRef = useRef<HTMLDivElement>(null);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset,
-    } = useForm<ReservationData>({
-        resolver: zodResolver(reservationSchema),
-        defaultValues: { name: "", phone: "", email: "", message: "" },
-    });
-
-    useEffect(() => {
-        const handleMouse = (e: MouseEvent) => {
-            setMousePos({
-                x: (e.clientX / window.innerWidth - 0.5) * 20,
-                y: (e.clientY / window.innerHeight - 0.5) * 20,
-            });
-        };
-        window.addEventListener("mousemove", handleMouse);
-        return () => window.removeEventListener("mousemove", handleMouse);
+    const handleMouse = useCallback((e: MouseEvent) => {
+        if (!parallaxRef.current) return;
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+        parallaxRef.current.style.setProperty("--parallax-x", `${x * 0.3}px`);
+        parallaxRef.current.style.setProperty("--parallax-y", `${y * 0.3}px`);
+        parallaxRef.current.style.setProperty("--float1-x", `${x * 0.5}px`);
+        parallaxRef.current.style.setProperty("--float1-y", `${y * 0.5}px`);
+        parallaxRef.current.style.setProperty("--float2-x", `${x * -0.3}px`);
+        parallaxRef.current.style.setProperty("--float2-y", `${y * -0.3}px`);
     }, []);
 
-    const onSubmit = (data: ReservationData) => {
-        const msg = `Hola Hotel Chavín, soy ${data.name}.\n📧 Email: ${data.email}\n📱 Teléfono: ${data.phone}\n${
-            data.message
-                ? `💬 Consulta: ${data.message}`
-                : "Deseo información sobre disponibilidad y tarifas."
-        }`;
-        window.open(getWhatsAppLink(msg), "_blank");
-        setSubmitted(true);
-        setTimeout(() => {
-            setSubmitted(false);
-            reset();
-        }, 3000);
-    };
+    useEffect(() => {
+        window.addEventListener("mousemove", handleMouse, { passive: true });
+        return () => window.removeEventListener("mousemove", handleMouse);
+    }, [handleMouse]);
 
     return (
         <section
             id="inicio"
             className="relative min-h-screen flex items-center justify-center overflow-hidden"
         >
-            {/* Background with parallax */}
-            <div className="absolute inset-0 bg-brand-navy">
+            {/* Background with parallax - uses CSS custom properties, zero re-renders */}
+            <div ref={parallaxRef} className="absolute inset-0 bg-brand-navy">
+                {/* LCP image: next/image with priority for above-the-fold hero */}
                 <div
-                    className="absolute inset-0 opacity-30 scale-110 transition-transform duration-[2s] ease-out"
+                    className="absolute inset-0 opacity-30 overflow-hidden"
                     style={{
-                        backgroundImage: `url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80')`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        transform: `translate(${mousePos.x * 0.3}px, ${mousePos.y * 0.3}px) scale(1.1)`,
+                        transform: `translate(var(--parallax-x, 0px), var(--parallax-y, 0px)) scale(1.1)`,
+                        transition: "transform 2s ease-out",
                     }}
-                />
+                >
+                    <Image
+                        src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80"
+                        alt="Hotel Chavin - Vista principal"
+                        fill
+                        priority
+                        sizes="100vw"
+                        className="object-cover"
+                        quality={75}
+                    />
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/80 via-brand-navy/60 to-brand-navy/95" />
 
-                {/* Decorative floating elements */}
+                {/* Decorative floating elements - use CSS custom properties for parallax */}
                 <div
                     className="absolute top-20 left-10 w-72 h-72 bg-brand-gold/10 rounded-full blur-3xl animate-float"
-                    style={{ transform: `translate(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px)` }}
+                    style={{ transform: `translate(var(--float1-x, 0px), var(--float1-y, 0px))` }}
                 />
                 <div
                     className="absolute bottom-20 right-10 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl animate-float-delayed"
-                    style={{ transform: `translate(${mousePos.x * -0.3}px, ${mousePos.y * -0.3}px)` }}
+                    style={{ transform: `translate(var(--float2-x, 0px), var(--float2-y, 0px))` }}
                 />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-gold/[0.03] rounded-full blur-3xl" />
 
@@ -96,11 +102,11 @@ export default function Hero() {
 
             <div className="relative z-10 container-max px-4 sm:px-6 lg:px-8 pt-32 pb-16 md:pt-40 md:pb-24">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-                    {/* Left – Text */}
+                    {/* Left - Text */}
                     <div className="text-center lg:text-left animate-fade-in">
                         <div className="inline-flex items-center gap-2 bg-brand-gold/20 text-brand-gold-light px-4 py-2 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-brand-gold/20">
                             <MapPin size={16} />
-                            Barranca, Perú
+                            Barranca, Peru
                             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                         </div>
                         <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-6">
@@ -109,7 +115,7 @@ export default function Hero() {
                         </h1>
                         <p className="text-gray-300 text-lg md:text-xl leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8">
                             {HOTEL.stats.rooms} habitaciones equipadas con WiFi y TV LED, a
-                            minutos de Caral y Paramonga. Tu mejor opción para disfrutar el
+                            minutos de Caral y Paramonga. Tu mejor opcion para disfrutar el
                             norte chico.
                         </p>
 
@@ -127,11 +133,7 @@ export default function Hero() {
 
                         {/* Mini feature badges */}
                         <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                            {[
-                                { icon: Shield, label: "Seguro" },
-                                { icon: Clock, label: "24/7" },
-                                { icon: Wifi, label: "Wi-Fi" },
-                            ].map((badge) => (
+                            {featureBadges.map((badge) => (
                                 <div
                                     key={badge.label}
                                     className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-gray-300 px-4 py-2 rounded-full text-sm"
@@ -143,7 +145,7 @@ export default function Hero() {
                         </div>
                     </div>
 
-                    {/* Right – Form */}
+                    {/* Right - Form (code-split) */}
                     <div className="animate-slide-up">
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-white/10 shadow-2xl relative overflow-hidden">
                             {/* Shimmer effect */}
@@ -154,91 +156,10 @@ export default function Hero() {
                                     Reservaciones
                                 </h2>
                                 <p className="text-gray-400 text-sm mb-6">
-                                    Completa tus datos y te contactaremos al instante vía WhatsApp
+                                    Completa tus datos y te contactaremos al instante via WhatsApp
                                 </p>
 
-                                {submitted ? (
-                                    <div className="text-center py-12">
-                                        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-scale-in">
-                                            <Send className="text-green-400" size={28} />
-                                        </div>
-                                        <p className="text-white font-semibold text-lg">
-                                            ¡Mensaje enviado!
-                                        </p>
-                                        <p className="text-gray-400 text-sm mt-1">
-                                            Revisa tu WhatsApp para continuar
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <form
-                                        onSubmit={handleSubmit(onSubmit)}
-                                        className="space-y-4"
-                                        noValidate
-                                    >
-                                        <div>
-                                            <input
-                                                {...register("name")}
-                                                type="text"
-                                                placeholder="Nombre completo"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-all"
-                                            />
-                                            {errors.name && (
-                                                <p className="text-red-400 text-xs mt-1">
-                                                    {errors.name.message}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <input
-                                                    {...register("phone")}
-                                                    type="tel"
-                                                    placeholder="Teléfono"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-all"
-                                                />
-                                                {errors.phone && (
-                                                    <p className="text-red-400 text-xs mt-1">
-                                                        {errors.phone.message}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <input
-                                                    {...register("email")}
-                                                    type="email"
-                                                    placeholder="Email"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-all"
-                                                />
-                                                {errors.email && (
-                                                    <p className="text-red-400 text-xs mt-1">
-                                                        {errors.email.message}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <textarea
-                                                {...register("message")}
-                                                placeholder="¿Tienes alguna consulta? (opcional)"
-                                                rows={3}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold/50 transition-all resize-none"
-                                            />
-                                        </div>
-
-                                        <button
-                                            type="submit"
-                                            className="w-full btn-primary py-4 text-base rounded-xl group"
-                                        >
-                                            <Send
-                                                size={18}
-                                                className="transition-transform duration-300 group-hover:translate-x-1"
-                                            />
-                                            Enviar consulta por WhatsApp
-                                        </button>
-                                    </form>
-                                )}
+                                <HeroForm />
                             </div>
                         </div>
                     </div>

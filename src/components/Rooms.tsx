@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ROOMS, getWhatsAppLink } from "@/lib/constants";
 import { MessageCircle, Users, Bed } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -39,8 +40,8 @@ export default function Rooms() {
                     <h2 className="heading-primary mb-4">Habitaciones</h2>
                     <div className="gold-line-center mb-6" />
                     <p className="text-body">
-                        Descubre el espacio ideal para tu estadía. Cada habitación está
-                        diseñada pensando en tu comodidad.
+                        Descubre el espacio ideal para tu estadia. Cada habitacion esta
+                        disenada pensando en tu comodidad.
                     </p>
                 </div>
 
@@ -53,13 +54,16 @@ export default function Rooms() {
                         const Icon = roomIcons[room.id] || Users;
                         return (
                             <div key={room.id} className="card group">
-                                {/* Image */}
+                                {/* Image - next/image with explicit dimensions for CLS prevention */}
                                 <div className="relative h-56 overflow-hidden">
-                                    <img
+                                    <Image
                                         src={room.image}
                                         alt={room.name}
+                                        fill
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                                         loading="lazy"
-                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        quality={75}
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
