@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { HOTEL, FACILITIES_IMAGES } from "@/lib/constants";
+import { useScrollReveal, useAnimatedCounter } from "@/hooks/useScrollReveal";
 
 export default function Facilities() {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentImage, setCurrentImage] = useState(0);
+    const { ref: textRef, isVisible: textVisible } = useScrollReveal();
+    const { ref: galleryRef, isVisible: galleryVisible } = useScrollReveal();
+    const { ref: statsRef, isVisible: statsVisible } = useScrollReveal();
+
+    const roomCount = useAnimatedCounter(HOTEL.stats.rooms, statsVisible);
+    const yearCount = useAnimatedCounter(30, statsVisible);
 
     const openLightbox = (index: number) => {
         setCurrentImage(index);
@@ -28,18 +35,26 @@ export default function Facilities() {
 
     return (
         <>
-            <section className="section-padding bg-white">
+            <section className="section-padding bg-white relative overflow-hidden">
+                {/* Decorative */}
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-gold/20 to-transparent" />
+                <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-brand-gold/5 rounded-full blur-3xl" />
+
                 <div className="container-max">
                     <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                         {/* Text */}
-                        <div>
+                        <div
+                            ref={textRef}
+                            className={`reveal-left ${textVisible ? "visible" : ""}`}
+                        >
                             <span className="inline-block text-brand-gold font-semibold text-sm uppercase tracking-[0.15em] mb-4">
                                 Nuestros espacios
                             </span>
                             <h2 className="heading-primary mb-6">
                                 Las mejores{" "}
-                                <span className="text-brand-gold">instalaciones</span>
+                                <span className="text-gradient-gold">instalaciones</span>
                             </h2>
+                            <div className="gold-line mb-6" />
                             <p className="text-body mb-6">
                                 Contamos con{" "}
                                 <strong>{HOTEL.stats.rooms} habitaciones</strong> adecuadas a
@@ -53,24 +68,27 @@ export default function Facilities() {
                             </p>
 
                             {/* Stats */}
-                            <div className="flex gap-8">
-                                <div>
-                                    <div className="text-3xl md:text-4xl font-display font-bold text-brand-gold">
-                                        {HOTEL.stats.rooms}
+                            <div
+                                ref={statsRef}
+                                className="flex gap-8"
+                            >
+                                <div className="text-center">
+                                    <div className="text-3xl md:text-4xl font-display font-bold text-gradient-gold">
+                                        {roomCount}
                                     </div>
                                     <div className="text-gray-500 text-sm mt-1">Habitaciones</div>
                                 </div>
-                                <div className="w-px bg-gray-200" />
-                                <div>
-                                    <div className="text-3xl md:text-4xl font-display font-bold text-brand-gold">
+                                <div className="w-px bg-gradient-to-b from-transparent via-brand-gold/30 to-transparent" />
+                                <div className="text-center">
+                                    <div className="text-3xl md:text-4xl font-display font-bold text-gradient-gold">
                                         24/7
                                     </div>
                                     <div className="text-gray-500 text-sm mt-1">Recepción</div>
                                 </div>
-                                <div className="w-px bg-gray-200" />
-                                <div>
-                                    <div className="text-3xl md:text-4xl font-display font-bold text-brand-gold">
-                                        +30
+                                <div className="w-px bg-gradient-to-b from-transparent via-brand-gold/30 to-transparent" />
+                                <div className="text-center">
+                                    <div className="text-3xl md:text-4xl font-display font-bold text-gradient-gold">
+                                        +{yearCount}
                                     </div>
                                     <div className="text-gray-500 text-sm mt-1">Años</div>
                                 </div>
@@ -78,7 +96,10 @@ export default function Facilities() {
                         </div>
 
                         {/* Gallery grid */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div
+                            ref={galleryRef}
+                            className={`grid grid-cols-2 gap-4 reveal-right ${galleryVisible ? "visible" : ""}`}
+                        >
                             {FACILITIES_IMAGES.map((img, i) => (
                                 <button
                                     key={img.src}
@@ -91,8 +112,8 @@ export default function Facilities() {
                                         loading="lazy"
                                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                                        <span className="text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm bg-black/50 px-3 py-1.5 rounded-lg">
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                                        <span className="text-white font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 text-sm bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full">
                                             Ver más
                                         </span>
                                     </div>
@@ -106,7 +127,7 @@ export default function Facilities() {
             {/* Lightbox modal */}
             {lightboxOpen && (
                 <div
-                    className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center animate-fade-in"
+                    className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center animate-fade-in"
                     onClick={closeLightbox}
                     onKeyDown={(e) => {
                         if (e.key === "Escape") closeLightbox();
@@ -144,7 +165,7 @@ export default function Facilities() {
                         <img
                             src={FACILITIES_IMAGES[currentImage].src}
                             alt={FACILITIES_IMAGES[currentImage].alt}
-                            className="max-w-full max-h-full object-contain"
+                            className="max-w-full max-h-full object-contain rounded-lg"
                         />
                     </div>
 
@@ -159,7 +180,7 @@ export default function Facilities() {
                         <ChevronRight size={32} />
                     </button>
 
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 text-sm bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full">
                         {FACILITIES_IMAGES[currentImage].alt}
                     </div>
                 </div>

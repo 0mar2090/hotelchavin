@@ -94,6 +94,41 @@ export const ATTRACTIONS = [
     },
 ] as const;
 
+export const TESTIMONIALS = [
+    {
+        id: "1",
+        name: "María García",
+        origin: "Lima, Perú",
+        rating: 5,
+        text: "Excelente atención y ubicación perfecta. Las habitaciones son muy limpias y cómodas. Ideal para visitar Caral. Volveré sin duda.",
+        date: "Enero 2026",
+    },
+    {
+        id: "2",
+        name: "Carlos Mendoza",
+        origin: "Huaraz, Perú",
+        rating: 5,
+        text: "El mejor hotel de Barranca. Personal muy amable, desayuno incluido y estacionamiento seguro. Lo recomiendo al 100%.",
+        date: "Diciembre 2025",
+    },
+    {
+        id: "3",
+        name: "Ana Torres",
+        origin: "Trujillo, Perú",
+        rating: 4,
+        text: "Muy buena experiencia. Habitación matrimonial acogedora, Wi-Fi estable y buena ubicación. Perfecto para una escapada de fin de semana.",
+        date: "Noviembre 2025",
+    },
+    {
+        id: "4",
+        name: "Roberto Silva",
+        origin: "Arequipa, Perú",
+        rating: 5,
+        text: "Nos alojamos 3 noches con la familia. Habitaciones amplias, limpias y el personal siempre dispuesto a ayudar. Precio justo.",
+        date: "Octubre 2025",
+    },
+] as const;
+
 export function getWhatsAppLink(message: string): string {
     return `https://wa.me/${HOTEL.whatsapp}?text=${encodeURIComponent(message)}`;
 }

@@ -5,6 +5,8 @@ import { HOTEL } from "@/lib/constants";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
+import ScrollProgress from "@/components/ScrollProgress";
+import BackToTop from "@/components/BackToTop";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -115,10 +117,12 @@ export default function RootLayout({
                 />
             </head>
             <body className="antialiased">
+                <ScrollProgress />
                 <Header />
                 <main>{children}</main>
                 <Footer />
                 <WhatsAppWidget />
+                <BackToTop />
             </body>
         </html>
     );
